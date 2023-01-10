@@ -1,0 +1,13 @@
+<highcharts-chart
+  style="width: 100%; display: block"
+  id="container"
+      [Highcharts]="Highcharts"
+      [constructorType]="chartConstructor"
+      [options]="chartOptions"
+      [callbackFunction]="chartCallback"
+      [(update)]="updateFlag"
+      [oneToOne]="true"
+>
+</highcharts-chart>
+
+<p>{{ chartOptions.chart && chartOptions.chart.parallelCoordinates ? chartOptions.chart.parallelCoordinates : "none" }}</p>

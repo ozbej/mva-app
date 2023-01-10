@@ -30,9 +30,12 @@ export class UploadCsvComponent {
 
         let rows: any[] = this.getRowsFromCSV(csvRowsArray, numCols);
 
+        let parallelCoordinates = this.prepareParallelCoordinates(headerRow, rows);
+
         this.csvService.setRows(rows);
         this.csvService.setHeaderRow(headerRow);
         this.csvService.setNumCols(numCols);
+        this.csvService.setParallelCoordinates(parallelCoordinates);
       }
 
       reader.onerror = () => {
@@ -41,6 +44,7 @@ export class UploadCsvComponent {
         this.csvService.setRows([]);
         this.csvService.setHeaderRow([]);
         this.csvService.setNumCols(0);
+        this.csvService.setParallelCoordinates({});
       }
     }
 
@@ -52,12 +56,30 @@ export class UploadCsvComponent {
   }
 
   getHeaderArray(csvRecordsArr: any): any[] {  
-    let headers = (<string>csvRecordsArr[0]).split(',');  
-    let headerArray = [];  
-    for (let j = 0; j < headers.length; j++) {  
-      headerArray.push(headers[j]);  
+    let headers: string[] = (<string>csvRecordsArr[0]).split(',');
+    let headerTypes: any[] = this.getHeaderTypes((<string>csvRecordsArr[1]).split(','));
+    let headerArray: object[] = [];
+    let currHeader: object = {};
+    for (let i = 0; i < headers.length; i++) {
+      currHeader = {
+        title: headers[i],
+        type: headerTypes[i]
+      } 
+      headerArray.push(currHeader);  
     }  
     return headerArray;  
+  }
+
+  getHeaderTypes(csvRow: any[]): any[] {
+    let types: any[] = [];
+    let currType: string = "";
+    for (let i of csvRow) {
+      currType = "string";
+      if (parseInt(i)) currType = "int";
+      else if (parseFloat(i)) currType = "float";
+      types.push(currType);
+    }
+    return types;
   }
 
   getRowsFromCSV(csvRowsArray: any[], numCols: number): any[] {
@@ -71,6 +93,41 @@ export class UploadCsvComponent {
     }
 
     return csvArr;
+  }
+
+  prepareParallelCoordinates(headerRow: any[], rows: any[]): object {
+    return {
+      chart: {
+        parallelCoordinates: true
+      },
+      yAxis: [{
+        min: 0,
+        max: 10,
+      }, {
+        min: 0,
+        max: 10
+      }, {
+        min: 0,
+        max: 10
+      }, {
+        min: 0,
+        max: 10
+      }, {
+        min: 0,
+        max: 10
+      }],
+      series: [
+        {
+          data: [2, 6, 3, 2, 4],
+          type: "line"
+        },
+        {
+          data: [1, 5, 6, 8, 9],
+          type: "line"
+        }
+      ]
+  
+    };
   }
 
 }

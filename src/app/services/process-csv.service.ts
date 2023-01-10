@@ -8,6 +8,7 @@ export class ProcessCsvService {
   private rows = new Subject<any[]>();
   private headerRow = new Subject<any[]>();
   private numCols = new Subject<number>();
+  private parallelCoordinates = new Subject<object>();
 
   constructor() { }
 
@@ -33,5 +34,13 @@ export class ProcessCsvService {
 
   getNumCols(): any {
     return this.numCols.asObservable();
+  }
+
+  setParallelCoordinates(options: object): void {
+    this.parallelCoordinates.next(options);
+  }
+
+  getParallelCoordinates(): any {
+    return this.parallelCoordinates.asObservable();
   }
 }
