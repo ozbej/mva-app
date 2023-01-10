@@ -1,0 +1,14 @@
+<div style="overflow-y: scroll; max-height: 200px; background-color: lightgray;">
+    <table *ngIf="rows.length > 0">
+        <thead>
+            <tr>
+                <th *ngFor="let header of headerRow">{{ header }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let row of rows">
+                <td *ngFor="let value of row">{{ value }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
