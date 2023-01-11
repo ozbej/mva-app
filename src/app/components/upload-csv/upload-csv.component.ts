@@ -22,6 +22,8 @@ export class UploadCsvComponent {
       reader.readAsText(input.files[0]);
 
       reader.onload = () => {
+        let startTime = performance.now();
+
         let csvData: any = reader.result;
         let csvRowsArray: any = (<string>csvData).split(/\r\n|\n/);
 
@@ -36,6 +38,8 @@ export class UploadCsvComponent {
         this.csvService.setHeaderRow(headerRow);
         this.csvService.setNumCols(numCols);
         this.csvService.setParallelCoordinates(parallelCoordinates);
+
+        console.log(`Processing a dataset (${rows.length} rows with ${headerRow.length} columns) took ${performance.now() - startTime} milliseconds.`)
       }
 
       reader.onerror = () => {
@@ -96,37 +100,44 @@ export class UploadCsvComponent {
   }
 
   prepareParallelCoordinates(headerRow: any[], rows: any[]): object {
+    let yAxis: any[] = [];
+    let validColums: number[] = []; // Indices of columns that are not string
+    let series: any[] = [];
+    let currSeries: any[] = [];
+    let currItem: number;
+
+    for (let i = 0; i < headerRow.length; i++) {
+      if (headerRow[i].type && headerRow[i].title && headerRow[i].type !== "string") {
+        yAxis.push({ title: { text: headerRow[i].title } })
+        validColums.push(i);
+      }
+    }
+
+    for (let row of rows) {
+      currSeries = [];
+      for (let colIndex of validColums) {
+        if (headerRow[colIndex].type == "int")
+          currItem = parseInt(row[colIndex]);
+        else
+          currItem = parseFloat(row[colIndex]);
+
+        currSeries.push(currItem);
+      }
+
+      series.push({
+        data: currSeries,
+        type: "line"
+      });
+    }
+
     return {
       chart: {
         parallelCoordinates: true
       },
-      yAxis: [{
-        min: 0,
-        max: 10,
-      }, {
-        min: 0,
-        max: 10
-      }, {
-        min: 0,
-        max: 10
-      }, {
-        min: 0,
-        max: 10
-      }, {
-        min: 0,
-        max: 10
-      }],
-      series: [
-        {
-          data: [2, 6, 3, 2, 4],
-          type: "line"
-        },
-        {
-          data: [1, 5, 6, 8, 9],
-          type: "line"
-        }
-      ]
-  
+      title: { text: undefined },
+      legend: { enabled: false },
+      yAxis: yAxis,
+      series: series
     };
   }
 

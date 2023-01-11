@@ -16,7 +16,9 @@ export class ParallelCoordinatesViewComponent implements OnInit {
   updateFlag: boolean = false;
   chartConstructor: string = "chart";
   chartCallback: Highcharts.ChartCallbackFunction;
-  chartOptions: Highcharts.Options = {};
+  chartOptions: Highcharts.Options = {
+    title: { text: undefined }
+  };
 
   constructor(private csvService: ProcessCsvService) {
     const self = this;
