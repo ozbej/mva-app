@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ProcessCsvService } from '../../services/process-csv.service';
+import { DbService } from '../../services/db.service';
 
 @Component({
   selector: 'app-table-view',
@@ -9,14 +9,17 @@ import { ProcessCsvService } from '../../services/process-csv.service';
 export class TableViewComponent implements OnInit {
   rows: any[] = [];
   headerRow: any[] = [];
-  numCols: number = 0;
 
-  constructor(private csvService: ProcessCsvService) {}
+  constructor(private dbService: DbService) {}
 
   ngOnInit(): void {
-    this.csvService.getRows().subscribe((data: any[]) => (this.rows = data));
-    this.csvService.getHeaderRow().subscribe((data: any[]) => (this.headerRow = data));
-    this.csvService.getNumCols().subscribe((data: number) => (this.numCols = data));
+    this.dbService.getRows().subscribe((data: any) => (this.rows = data));
+    this.dbService.getHeaderRow().subscribe((data: any) => (this.headerRow = data));
+  }
+
+  ngOnDestroy(): void {
+    this.dbService.getRows().unsubscribe();
+    this.dbService.getHeaderRow().unsubscribe();
   }
 
 }

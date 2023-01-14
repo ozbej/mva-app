@@ -7,7 +7,7 @@
         </thead>
         <tbody>
             <tr *ngFor="let row of rows">
-                <td *ngFor="let value of row">{{ value }}</td>
+                <td *ngFor="let header of headerRow">{{ row[header.title] }}</td>
             </tr>
         </tbody>
     </table>

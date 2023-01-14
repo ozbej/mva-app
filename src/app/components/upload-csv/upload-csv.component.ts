@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { ProcessCsvService } from '../../services/process-csv.service';
+import { DbService } from '../../services/db.service';
 
 @Component({
   selector: 'app-upload-csv',
@@ -11,7 +11,7 @@ export class UploadCsvComponent {
 
   @ViewChild('csvReader') csvReader: any;
 
-  constructor(private csvService: ProcessCsvService) {}
+  constructor(private dbService: DbService) {}
 
   uploadListener($event: any): void {
     let files: string[] = $event.srcElement.files;
@@ -28,16 +28,10 @@ export class UploadCsvComponent {
         let csvRowsArray: any = (<string>csvData).split(/\r\n|\n/);
 
         let headerRow: any[] = this.getHeaderArray(csvRowsArray);
-        let numCols: number = headerRow.length;
-
-        let rows: any[] = this.getRowsFromCSV(csvRowsArray, numCols);
-
-        let parallelCoordinates = this.prepareParallelCoordinates(headerRow, rows);
-
-        this.csvService.setRows(rows);
-        this.csvService.setHeaderRow(headerRow);
-        this.csvService.setNumCols(numCols);
-        this.csvService.setParallelCoordinates(parallelCoordinates);
+        
+        let rows: any[] = this.getRowsFromCSV(csvRowsArray, headerRow);
+        
+        this.dbService.initDatabase(headerRow, rows);
 
         console.log(`Processing a dataset (${rows.length} rows with ${headerRow.length} columns) took ${performance.now() - startTime} milliseconds.`)
       }
@@ -45,10 +39,6 @@ export class UploadCsvComponent {
       reader.onerror = () => {
         console.log("Error: Please import a valid CSV file.");
         this.csvReader.nativeElement.value = "";
-        this.csvService.setRows([]);
-        this.csvService.setHeaderRow([]);
-        this.csvService.setNumCols(0);
-        this.csvService.setParallelCoordinates({});
       }
     }
 
@@ -86,59 +76,24 @@ export class UploadCsvComponent {
     return types;
   }
 
-  getRowsFromCSV(csvRowsArray: any[], numCols: number): any[] {
-    let csvArr: any[] = [];
+  getRowsFromCSV(rows: any[], headerRow: any[]): any[] {
 
-    for (let i = 1; i < csvRowsArray.length; i++) {
-      let currentRow: any[] = (<string>csvRowsArray[i]).split(',');
-      
-      if (currentRow.length === numCols) 
-        csvArr.push(currentRow)
-    }
+    let allRows: any[] = [];
+    let currRowObj: any = {};
+    let currRowArr: any[]
 
-    return csvArr;
-  }
+    for (let i: number = 1; i < rows.length; i++) {
+      currRowArr = (<string>rows[i]).split(',');
+      currRowObj = {};
 
-  prepareParallelCoordinates(headerRow: any[], rows: any[]): object {
-    let yAxis: any[] = [];
-    let validColums: number[] = []; // Indices of columns that are not string
-    let series: any[] = [];
-    let currSeries: any[] = [];
-    let currItem: number;
+      if (currRowArr.length !== headerRow.length) continue;
 
-    for (let i = 0; i < headerRow.length; i++) {
-      if (headerRow[i].type && headerRow[i].title && headerRow[i].type !== "string") {
-        yAxis.push({ title: { text: headerRow[i].title } })
-        validColums.push(i);
+      for (let j: number = 0; j < headerRow.length; j++) {
+        currRowObj[headerRow[j].title] = currRowArr[j];
       }
+      allRows.push(currRowObj);
     }
 
-    for (let row of rows) {
-      currSeries = [];
-      for (let colIndex of validColums) {
-        if (headerRow[colIndex].type == "int")
-          currItem = parseInt(row[colIndex]);
-        else
-          currItem = parseFloat(row[colIndex]);
-
-        currSeries.push(currItem);
-      }
-
-      series.push({
-        data: currSeries,
-        type: "line"
-      });
-    }
-
-    return {
-      chart: {
-        parallelCoordinates: true
-      },
-      title: { text: undefined },
-      legend: { enabled: false },
-      yAxis: yAxis,
-      series: series
-    };
+    return allRows;
   }
-
 }

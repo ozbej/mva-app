@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Subject, ReplaySubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProcessCsvService {
-  private rows = new Subject<any[]>();
-  private headerRow = new Subject<any[]>();
-  private numCols = new Subject<number>();
-  private parallelCoordinates = new Subject<object>();
+  private rows = new ReplaySubject<any>();
+  private headerRow = new ReplaySubject<any>();
+  private numCols = new ReplaySubject<any>();
+  private parallelCoordinates = new ReplaySubject<any>();
 
   constructor() { }
 

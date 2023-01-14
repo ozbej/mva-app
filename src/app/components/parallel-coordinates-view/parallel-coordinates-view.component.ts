@@ -35,4 +35,8 @@ export class ParallelCoordinatesViewComponent implements OnInit {
       self.updateFlag = true;
     });
   }
+
+  ngOnDestroy(): void {
+    this.csvService.getParallelCoordinates().unsubscribe();
+  }
 }
