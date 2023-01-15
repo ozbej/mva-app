@@ -12,25 +12,51 @@ export class DbService extends Dexie {
   constructor() {
     super("dataset");
 
-    this.version(2).stores({
-      rows: "++id",
-      headerRow: "++id, title, type"
-    })
+    Dexie.exists("dataset").then(exists => {
+      if (!exists) {
+        console.log("DB initialized");
+        this.version(1).stores({
+          rows: "++id",
+          headerRow: "++id, title, type"
+        });
+      }
 
-    // Initialize database
-    this.open()
-    .then(data => console.log("DB Opened"))
-    .catch(err => console.log(err.message));
-
-    this.table('rows').toArray().then(data => this.setRows(data));
-    this.table('headerRow').toArray().then(data => this.setHeaderRow(data));
+      this.open()
+      .then(data => {
+        console.log("DB opened");
+        this.table('rows').toArray().then(data => this.setRows(data));
+        this.table('headerRow').toArray().then(data => this.setHeaderRow(data));
+      })
+      .catch(err => console.log(err.message));
+    });
   }
 
-  initDatabase(headerRow: any[], rows: any[]): void {
-    // Clear database
-    this.table('rows').clear();
-    this.table('headerRow').clear();
+  async initDatabase(headerRow: any[], rows: any[]) {
+    this.close();
 
+    await this.delete();
+
+    // Set indexing of db to all columns
+    let indexString: string = "++id";
+    for (let header of headerRow) {
+      // If header starts with a number add $ in front (indexedDB requirement)
+      if (parseInt(header.title.charAt(0)))
+        indexString += `, $${header.title}`;
+      else
+        indexString += `, ${header.title}`;
+    }
+
+    
+    this.version(1).stores({
+      rows: indexString,
+      headerRow: "++id, title, type"
+    });
+
+    console.log(indexString);
+
+    this.open()
+    .then(data => console.log("DB Opened"));
+    
     // Insert headerRow and rows to db
     this.table('headerRow').bulkAdd(headerRow);
     this.table('rows').bulkAdd(rows);
