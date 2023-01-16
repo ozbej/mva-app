@@ -39,7 +39,7 @@ export class DbService extends Dexie {
     // Set indexing of db to all columns
     let indexString: string = "++id";
     for (let header of headerRow) {
-      // If header starts with a number add $ in front (indexedDB requirement)
+      // If header starts with a number, add $ in front (indexedDB requirement)
       if (parseInt(header.title.charAt(0)))
         indexString += `, $${header.title}`;
       else
