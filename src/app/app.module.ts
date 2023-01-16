@@ -5,8 +5,8 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { UploadCsvComponent } from './components/upload-csv/upload-csv.component';
 import { TableViewComponent } from './components/table-view/table-view.component';
-import { ParallelCoordinatesViewComponent } from './components/parallel-coordinates-view/parallel-coordinates-view.component';
 import { HighchartsChartModule } from 'highcharts-angular';
+import { ParallelCoordinatesViewComponent } from './components/parallel-coordinates-view/parallel-coordinates-view.component';
 
 @NgModule({
   declarations: [
